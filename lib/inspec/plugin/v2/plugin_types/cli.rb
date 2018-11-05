@@ -41,4 +41,8 @@ module Inspec::Plugin::V2::PluginType
     class_option :log_location, type: :string,
                 desc: 'Location to send diagnostic log messages to. (default: STDOUT or Inspec::Log.error)'
   end
+
+  class CliOption < Inspec::Plugin::V2::PluginBase
+    register_plugin_type(:cli_option)
+  end
 end

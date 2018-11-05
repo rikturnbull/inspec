@@ -29,14 +29,22 @@ class CliCommandSuperclassTests < MiniTest::Test
   end
 end
 
-class CliCommandPluginV2API < MiniTest::Test
-  def test_cli_command_api_methods_present
-    # instance methods
-    [
-      :invoke,
-    ].each do |method_name|
-      klass = Inspec::Plugin::V2::PluginType::CliCommand
-      assert klass.method_defined?(method_name), "CliCommand api instance method: #{method_name}"
-    end
+class CliOptionSuperclassTests < MiniTest::Test
+  # you can call Inspec.plugin(2, :cli_option) and get the plugin base class
+  def test_calling_Inspec_dot_plugin_with_cli_option_returns_the_cli_base_class
+    klass = Inspec.plugin(2, :cli_option)
+    assert_kind_of Class, klass
+    assert_equal 'Inspec::Plugin::V2::PluginType::CliOption', klass.name
+  end
+
+  def test_plugin_type_base_classes_can_be_accessed_by_name
+    klass = Inspec::Plugin::V2::PluginBase.base_class_for_type(:cli_option)
+    assert_kind_of Class, klass
+    assert_equal 'Inspec::Plugin::V2::PluginType::CliOption', klass.name
+  end
+
+  def test_plugin_type_registers_an_activation_dsl_method
+    klass = Inspec::Plugin::V2::PluginBase
+    assert_respond_to klass, :cli_option, 'Activation method for cli_command'
   end
 end
