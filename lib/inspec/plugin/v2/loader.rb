@@ -80,8 +80,46 @@ module Inspec::Plugin::V2
     end
 
     def activate_mentioned_cli_plugins(cli_args = ARGV)
-      # Get a list of CLI plugin activation hooks
+      # Activate CliCommand and CliOption plugins
+      # (in that order, since options may attach to commands)
+      activate_mentioned_cli_command_plugins(cli_args)
+      activate_mentioned_cli_option_plugins(cli_args)
+    end
+
+    def activate_mentioned_cli_command_plugins(cli_args)
+      # Get a list of CLI Command plugin activation hooks
       registry.find_activators(plugin_type: :cli_command).each do |act|
+        next if act.activated?
+
+        # Decide whether to activate.  Several conditions, so split them out for clarity.
+        # Assume no, to start.  Each condition may flip it true, which will short-circuit
+        # all following ||= ops.
+        activate_me = false
+
+        # If the user invoked `inspec help`, activate all CLI plugins, so they can
+        # display their usage message.
+        activate_me ||= cli_args.first == 'help'
+
+        # Likewise, if they invoked simply `inspec`, they are confused, and need
+        # usage info.
+        activate_me ||= cli_args.empty?
+
+        # If there is anything in the CLI args with the same name, activate it.
+        # This is the expected usual activation for individual plugins.
+        # `inspec dosomething` => activate the :dosomething hook
+        activate_me ||= cli_args.include?(act.activator_name.to_s)
+
+        # OK, activate.
+        if activate_me
+          act.activate!
+          act.implementation_class.register_with_thor
+        end
+      end
+    end
+
+    def activate_mentioned_cli_option_plugins(cli_args)
+      # Get a list of CLI Option plugin activation hooks
+      registry.find_activators(plugin_type: :cli_option).each do |act|
         next if act.activated?
 
         # Decide whether to activate.  Several conditions, so split them out for clarity.

@@ -44,5 +44,14 @@ module Inspec::Plugin::V2::PluginType
 
   class CliOption < Inspec::Plugin::V2::PluginBase
     register_plugin_type(:cli_option)
+
+    @options_for_plugin_class = {}
+
+    def self.option(option_name, option_options)
+      option_obj = Thor.option(option_name, option_options)
+      @options_for_plugin_class[self] ||= []
+      @options_for_plugin_class << option_obj
+    end
+
   end
 end

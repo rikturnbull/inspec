@@ -126,6 +126,44 @@ describe 'cli command plugins' do
 end
 
 #=========================================================================================#
+#                           CliOption plugin type
+#=========================================================================================#
+describe 'cli option plugins' do
+  include PluginFunctionalHelper
+
+  let(:cli_option_plugin_path) { File.join(mock_path, 'plugins', 'inspec-cli-option-test', 'lib', 'inspec-cli-option.rb')}
+  let(:run_result) { run_inspec_with_plugin(invocation,  plugin_path: cli_option_plugin_path, json: false) }
+
+  describe 'when calling a command for which the plugin has attached an option' do
+    let(:invocation) { 'shell --cheery -c "describe(true) { it { should be_true } } "'}
+    it 'is able to change behavior' do
+      run_result.exit_status.must_equal 0
+      run_result.stdout.must_include 'Hello, REPL user!' # plugin behavior
+      run_result.stdout.must_include 'true'     # shell behavior
+    end
+  end
+
+  describe 'when calling a command with the option for which the plugin has not attached an option' do
+    let(:simple_profile) { File.join(profile_path, '') }
+    let(:invocation) { "exec --cheery #{simple_profile}"}
+    it 'should be a usage error' do
+      run_result.exit_status.must_equal 1
+      # TODO more here
+    end
+  end
+
+  describe 'when calling inspec shell -h' do
+    let(:simple_profile) { nil }
+    let(:invocation) { 'shell -h' }
+
+    it 'the custom option is included in help' do
+      run_result.exit_status.must_equal 0
+      run_result.stdout.must_include 'cheery'
+    end
+  end
+end
+
+#=========================================================================================#
 #                           inspec plugin command
 #=========================================================================================#
 # See lib/plugins/inspec-plugin-manager-cli/test
