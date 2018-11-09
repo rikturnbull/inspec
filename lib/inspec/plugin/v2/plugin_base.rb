@@ -30,7 +30,7 @@ module Inspec::Plugin::V2
       @@plugin_type_classes[plugin_type_name] = new_plugin_type_base_class
 
       # This part defines the DSL command to register a concrete plugin's implementation of a plugin type
-      Inspec::Plugin::V2::PluginBase.define_singleton_method(new_dsl_method_name) do |hook_name, &hook_body|
+      Inspec::Plugin::V2::PluginBase.define_singleton_method(new_dsl_method_name) do |hook_name, hook_args = {}, &hook_body|
         plugin_concrete_class = self
 
         # Verify class is registered (i.e. plugin_name has been called)
@@ -45,6 +45,7 @@ module Inspec::Plugin::V2
         activator.plugin_type = plugin_type_name
         activator.activator_name = hook_name.to_sym
         activator.activation_proc = hook_body
+        activator.args = hook_args
 
         status.activators << activator
       end
