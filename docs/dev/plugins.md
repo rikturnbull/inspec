@@ -321,3 +321,39 @@ no_command do
   end
 end
 ```
+
+## Implementing a CLI Option Plugin
+
+If you wish to attach a new option to existing commands, or make a new CLI option globally available, you want a `cli_option` plugin.
+
+Don't use `cli_option` to implement options for a custom command - just use the `option` Thor DSL method in a `cli_command` implementation.
+
+CLI Option lets you do things like this:
+
+```bash
+# A custom option attached to the exec and shell commands
+you@machine$ inspec exec --cheerful my/profile
+
+Profile: InSpec Profile (profile-attribute)
+Version: 0.1.0
+Target:  local://
+
+  alice
+     ×  should eq "bob"
+     expected: "bob"
+          got: "alice"
+     (compared using ==)
+
+Profile Summary: 0 successful control, 1 control failures, 0 control skipped
+Test Summary: 0 successful, 1 failure, 0 skipped
+Hey, look on the bright side: at least you know what to fix!
+
+[cwolfe@lodi inspec-plugins]$ be inspec detect --cheerful
+ERROR: "inspec detect" was called with arguments ["--cheerful"]
+Usage: "inspec detect"
+```
+
+As you can see, your custom option was attached to the `exec` command, but not `detect`.
+
+### Declare your plugin activators
+#### CliCommand Activator Example
