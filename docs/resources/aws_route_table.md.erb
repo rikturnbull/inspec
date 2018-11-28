@@ -21,8 +21,13 @@ This resource first became available in v2.0.16 of InSpec.
 
 ## Syntax
 
-    # Ensure that a certain route table exists by name
+    # Ensure that a certain route table exists by id
     describe aws_route_table('rtb-123abcde') do
+      it { should exist }
+    end
+
+    # Ensure that a certain route table exists by Name tag
+    describe aws_route_table(route_table_name: 'my-route-table') do
       it { should exist }
     end
 
@@ -30,13 +35,19 @@ This resource first became available in v2.0.16 of InSpec.
 
 ### route\_table\_id
 
-This resource expects a single parameter that uniquely identifies the Route Table. You may pass it as a string, or as the value in a hash:
+This resource expects a route table id or Name tag that uniquely identifies the Route Table. You may pass it as a string, or as the value in a hash:
 
+    # Select by id
     describe aws_route_table('rtb-123abcde') do
       it { should exist }
     end
-    # Same
+    # Select by id
     describe aws_route_table(route_table_id: 'rtb-123abcde') do
+      it { should exist }
+    end
+
+    # Select by Name tag
+    describe aws_route_table(route_table_name: 'my-route-table') do
       it { should exist }
     end
 
