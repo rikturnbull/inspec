@@ -11,7 +11,11 @@ class AwsRouteTable < Inspec.resource(1)
   include AwsSingularResourceMixin
 
   def to_s
-    "Route Table #{@route_table_id}"
+    if !@route_table_name.nil?
+      "Route Table #{@route_table_name}"
+    else
+      "Route Table #{@route_table_id}"
+    end
   end
 
   attr_reader :route_table_id, :vpc_id
@@ -21,7 +25,7 @@ class AwsRouteTable < Inspec.resource(1)
   def validate_params(raw_params)
     validated_params = check_resource_param_names(
       raw_params: raw_params,
-      allowed_params: [:route_table_id],
+      allowed_params: [:route_table_id, :route_table_name],
       allowed_scalar_name: :route_table_id,
       allowed_scalar_type: String,
     )
@@ -39,10 +43,12 @@ class AwsRouteTable < Inspec.resource(1)
   def fetch_from_api
     backend = BackendFactory.create(inspec_runner)
 
-    if @route_table_id.nil?
-      args = nil
-    else
+    if !@route_table_id.nil?
       args = { filters: [{ name: 'route-table-id', values: [@route_table_id] }] }
+    elsif !@route_table_name.nil?
+      args = { filters: [{ name: 'tag:Name', values: [@route_table_name] }] }
+    else
+      args = nil
     end
 
     resp = backend.describe_route_tables(args)
