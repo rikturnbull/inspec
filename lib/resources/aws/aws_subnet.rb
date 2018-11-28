@@ -19,7 +19,11 @@ class AwsSubnet < Inspec.resource(1)
   alias assigning_ipv_6_address_on_creation? assigning_ipv_6_address_on_creation
 
   def to_s
-    "VPC Subnet #{@subnet_id}"
+    if !@subnet_name.nil?
+      "VPC Subnet #{@subnet_name}"
+    else
+      "VPC Subnet #{@subnet_id}"
+    end
   end
 
   private
@@ -27,7 +31,7 @@ class AwsSubnet < Inspec.resource(1)
   def validate_params(raw_params)
     validated_params = check_resource_param_names(
       raw_params: raw_params,
-      allowed_params: [:subnet_id],
+      allowed_params: [:subnet_id, :subnet_name],
       allowed_scalar_name: :subnet_id,
       allowed_scalar_type: String,
     )
@@ -38,7 +42,7 @@ class AwsSubnet < Inspec.resource(1)
     end
 
     if validated_params.empty?
-      raise ArgumentError, 'You must provide a subnet_id to aws_subnet.'
+      raise ArgumentError, 'You must provide a subnet_id or subnet_name to aws_subnet.'
     end
 
     validated_params
@@ -49,7 +53,8 @@ class AwsSubnet < Inspec.resource(1)
 
     # Transform into filter format expected by AWS
     filters = []
-    filters.push({ name: 'subnet-id', values: [@subnet_id] })
+    filters.push({ name: 'subnet-id', values: [@subnet_id] }) if !@subnet_id.nil?
+    filters.push({ name: 'tag:Name', values: [@subnet_name] }) if !@subnet_name.nil?
     ds_response = backend.describe_subnets(filters: filters)
 
     # If no subnets exist in the VPC, exist is false.

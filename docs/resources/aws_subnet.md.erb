@@ -27,11 +27,19 @@ This resource first became available in v2.0.16 of InSpec.
 
 An `aws_subnet` resource block uses the parameter to select a VPC and a subnet in the VPC.
 
+Select by subnet id:
+
     describe aws_subnet(subnet_id: 'subnet-1234567') do
       it { should exist }
       its('cidr_block') { should eq '10.0.1.0/24' }
     end
 
+Or select by subname Name tag:
+
+    describe aws_subnet(subnet_name: 'my-subnet) do
+      it { should exist }
+      its('cidr_block') { should eq '10.0.1.0/24' }
+    end
 <br>
 
 ## Resource Parameters
@@ -47,6 +55,14 @@ A string identifying the subnet that the VPC contains.
       it { should exist }
     end
 
+### subnet\_name
+
+A string identifying the Name tag of a subnet:
+
+    # This will error if there is more than the default SG
+    describe aws_subnet(subnet_name: 'my-subnet') do
+      it { should exist }
+    end
 <br>
 
 ## Properties
